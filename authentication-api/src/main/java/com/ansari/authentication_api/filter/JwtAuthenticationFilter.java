@@ -33,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getServletPath();
-
+        // check if url is public no need to authenticate
         if (PUBLIC_URL.contains(path)) {
             filterChain.doFilter(request, response);
             return;
@@ -58,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             }
-            //validate the token ans set the security context.
+            //validate the token and set the security context.
             if (jwt != null) {
 
                 email = jwtUtil.extractUsername(jwt);

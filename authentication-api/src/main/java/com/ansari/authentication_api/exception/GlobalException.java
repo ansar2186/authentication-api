@@ -59,4 +59,14 @@ public class GlobalException {
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), "email", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(InvalidOtpException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidOtpException(InvalidOtpException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), "email", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(OtpExpiredException.class)
+    public ResponseEntity<ApiErrorResponse> handleOtpExpiredException(OtpExpiredException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage(), "email", ex.getMessage(), request);
+    }
+
 }

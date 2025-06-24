@@ -1,4 +1,5 @@
 package com.ansari.authentication_api.controller;
+
 import com.ansari.authentication_api.Io.AuthRequest;
 import com.ansari.authentication_api.Io.AuthResponse;
 import com.ansari.authentication_api.service.AppUserDetailsService;
@@ -14,7 +15,9 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,11 +28,27 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
+
     private final AuthenticationManager authenticationManager;
     private final AppUserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
     private final ProfileService service;
 
+    /**
+     * Handles user login by authenticating the provided email and password.
+     * <p>
+     * If authentication is successful, generates a JWT token, sets it in an HTTP-only cookie,
+     * and returns an {@link AuthResponse} containing the user's email and token.
+     * <p>
+     * In case of failure, returns an appropriate error response with status code:
+     * <ul>
+     *     <li><b>400 Bad Request</b>: if the credentials are invalid</li>
+     *     <li><b>401 Unauthorized</b>: if the account is disabled or authentication fails</li>
+     * </ul>
+     *
+     * @param request the login request containing email and password
+     * @return a {@link ResponseEntity} containing the authentication result or error details
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
@@ -65,5 +84,16 @@ public class AuthController {
 
     private void authentication(String email, String password) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+    }
+
+    /**
+     * Checks if the current user is authenticated.
+     *
+     * @return {@code true} if the user is authenticated, otherwise {@code false}
+     */
+    @GetMapping("/is-authenticated")
+    public ResponseEntity<Boolean> isAuthenticated() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return ResponseEntity.ok(auth.getName() != null);
     }
 }
