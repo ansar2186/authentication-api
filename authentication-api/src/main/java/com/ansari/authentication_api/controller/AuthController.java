@@ -5,6 +5,12 @@ import com.ansari.authentication_api.Io.AuthResponse;
 import com.ansari.authentication_api.service.AppUserDetailsService;
 import com.ansari.authentication_api.service.ProfileService;
 import com.ansari.authentication_api.util.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +33,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Authentication", description = "APIs for user authentication")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -49,6 +56,18 @@ public class AuthController {
      * @param request the login request containing email and password
      * @return a {@link ResponseEntity} containing the authentication result or error details
      */
+    @Operation(
+            summary = "Login user",
+            description = "Authenticate user using email and password, return JWT token in cookie and response body."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully authenticated",
+                    content = @Content(schema = @Schema(implementation = AuthResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid credentials",
+                    content = @Content(schema = @Schema(example = "{\"Error\": true, \"Message\": \"Invalid Email or Password\"}"))),
+            @ApiResponse(responseCode = "401", description = "Account disabled or authentication failed",
+                    content = @Content(schema = @Schema(example = "{\"Error\": true, \"Message\": \"Account is disabled\"}")))
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
@@ -91,6 +110,11 @@ public class AuthController {
      *
      * @return {@code true} if the user is authenticated, otherwise {@code false}
      */
+    @Operation(
+            summary = "Check Authentication Status",
+            description = "Returns true if a user is currently authenticated, false otherwise."
+    )
+    @ApiResponse(responseCode = "200", description = "Authenticated status")
     @GetMapping("/is-authenticated")
     public ResponseEntity<Boolean> isAuthenticated() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
